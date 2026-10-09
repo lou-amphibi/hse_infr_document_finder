@@ -1,17 +1,20 @@
 import logging
 import sys
 
+from config.settings import settings
+
 
 def setup_logger(name: str = "hse_doc") -> logging.Logger:
-    doc_logger = logging.getLogger(name)
+    logger = logging.getLogger(name)
 
-    if doc_logger.handlers:
-        return doc_logger
+    # Чтобы при повторном вызове не добавлялись дублирующие хендлеры
+    if logger.handlers:
+        return logger
 
-    doc_logger.setLevel(logging.DEBUG)
+    logger.setLevel(settings.LOG_LEVEL)
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(settings.LOG_LEVEL)
 
     formatter = logging.Formatter(
         fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
@@ -19,10 +22,10 @@ def setup_logger(name: str = "hse_doc") -> logging.Logger:
     )
     handler.setFormatter(formatter)
 
-    doc_logger.addHandler(handler)
-    doc_logger.propagate = False
+    logger.addHandler(handler)
+    logger.propagate = False
 
-    return doc_logger
+    return logger
 
 
 logger = setup_logger()

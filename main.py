@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Response
 
+from config.settings import settings
 from core.doc_const import DOCUMENTS
 from core.logger import logger
 from models.schemas import DocumentCreate, DocumentSearch
@@ -18,19 +19,28 @@ from service.service import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("=" * 60)
-    logger.info("HSE Document Finder — starting up")
+    logger.info("%s v%s — starting up", settings.APP_NAME, settings.APP_VERSION)
     logger.info("Loaded %d documents into memory", len(DOCUMENTS))
+    logger.info("-" * 60)
+    logger.info("Application settings:")
+    for key, value in settings.as_dict().items():
+        logger.info("  %s = %r", key, value)
+    logger.info("-" * 60)
     logger.info("Docs available at http://127.0.0.1:8000/docs")
     logger.info("=" * 60)
 
     yield
 
     logger.info("=" * 60)
-    logger.info("HSE Document Finder — shutting down")
+    logger.info("%s v%s — shutting down", settings.APP_NAME, settings.APP_VERSION)
     logger.info("=" * 60)
 
 
-app = FastAPI(title="HSE Document Finder", lifespan=lifespan)
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    lifespan=lifespan,
+)
 
 
 @app.get("/documents")
@@ -115,4 +125,4 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"version": "0.4v"}
+    return {"version": settings.APP_VERSION}
