@@ -1,14 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 
 from core.doc_const import DOCUMENTS
 from core.logger import logger
 from models.schemas import DocumentCreate, DocumentSearch
-
 from service.service import (
     create_document,
+    delete_document,
     find_document_by_full_match,
     get_all_documents,
     get_document_by_id,
@@ -57,20 +57,6 @@ def create_new_document(payload: DocumentCreate):
     return document
 
 
-@app.get("/documents/{document_id}")
-def get_document(document_id: int):
-    logger.info("GET /documents/%s — incoming request", document_id)
-    document = get_document_by_id(document_id)
-    if document is None:
-        logger.warning("GET /documents/%s — not found", document_id)
-        raise HTTPException(
-            status_code=404,
-            detail=f"Документ с id={document_id} не найден",
-        )
-    logger.info("GET /documents/%s — found '%s'", document_id, document["title"])
-    return document
-
-
 @app.post("/documents/search")
 def search_document(query: DocumentSearch):
     logger.info(
@@ -91,6 +77,37 @@ def search_document(query: DocumentSearch):
     return document
 
 
+@app.get("/documents/{document_id}")
+def get_document(document_id: int):
+    logger.info("GET /documents/%s — incoming request", document_id)
+    document = get_document_by_id(document_id)
+    if document is None:
+        logger.warning("GET /documents/%s — not found", document_id)
+        raise HTTPException(
+            status_code=404,
+            detail=f"Документ с id={document_id} не найден",
+        )
+    logger.info("GET /documents/%s — found '%s'", document_id, document["title"])
+    return document
+
+
+@app.delete("/documents/{document_id}", status_code=204)
+def delete_existing_document(document_id: int):
+    logger.info("DELETE /documents/%s — incoming request", document_id)
+
+    deleted = delete_document(document_id)
+
+    if not deleted:
+        logger.warning("DELETE /documents/%s — not found, returning 404", document_id)
+        raise HTTPException(
+            status_code=404,
+            detail=f"Документ с id={document_id} не найден",
+        )
+
+    logger.info("DELETE /documents/%s — deleted, returning 204", document_id)
+    return Response(status_code=204)
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -98,4 +115,4 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"version": "0.3v"}
+    return {"version": "0.4v"}
