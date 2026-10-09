@@ -4,7 +4,7 @@ import os
 class Settings:
 
     APP_NAME: str = os.getenv("APP_NAME", "HSE Document Finder")
-    APP_VERSION: str = os.getenv("APP_VERSION", "1.0.1")
+    APP_VERSION: str = os.getenv("APP_VERSION", "1.0.2")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
     def as_dict(self) -> dict:
