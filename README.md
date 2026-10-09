@@ -225,3 +225,55 @@ curl -X DELETE http://127.0.0.1:8000/documents/7
 
 - при перезапуске сервера все изменения (созданные и удалённые документы) сбрасываются к исходному набору;
 - одновременная работа нескольких воркеров приведёт к рассинхронизации данных.
+
+## Диагностика проблем
+
+### `ModuleNotFoundError: No module named 'fastapi'`
+
+Не активировано виртуальное окружение или не установлены зависимости.
+
+```bash
+venv\Scripts\activate          # Windows
+source venv/bin/activate       # Linux / macOS
+pip install -r requirements.txt
+```
+
+### `Address already in use` — порт 8000 занят
+
+Остановите старый сервер (`Ctrl+C`) или запустите на другом порту:
+
+```bash
+uvicorn main:app --reload --port 8001
+```
+
+### DEBUG-логи не появляются
+
+Переменная `LOG_LEVEL=DEBUG` не подхватилась. При старте в логах есть строка `Log level: <значение>` — если там `INFO`, переменная не задана.
+
+Задайте её одним из способов:
+
+```powershell
+$env:LOG_LEVEL="DEBUG"; uvicorn main:app --reload    # Windows PowerShell
+```
+```bash
+LOG_LEVEL=DEBUG uvicorn main:app --reload            # Linux / macOS
+```
+
+Либо в PyCharm: `Edit Configurations` → `Environment variables` → `LOG_LEVEL=DEBUG`.
+
+### `Cannot connect to host 127.0.0.1:8000`
+
+Сервер не запущен. Запустите в отдельном терминале:
+
+```bash
+uvicorn main:app --reload
+```
+
+Дождитесь строки `Application startup complete.` в логах, прежде чем отправлять запросы.
+
+### Где искать больше информации
+
+- **Swagger UI** — http://127.0.0.1:8000/docs — интерактивная документация
+- **Логи приложения** — в терминале с запущенным `uvicorn` или в панели `Run` в PyCharm
+- **Логи CI** — на GitHub во вкладке **Actions** → выберите запуск
+- **Артефакт сборки** — на GitHub в **Actions** → запуск → блок **Artifacts** внизу страницы
