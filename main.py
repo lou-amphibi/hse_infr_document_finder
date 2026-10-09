@@ -3,9 +3,9 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 
-from doc_const import DOCUMENTS
-from logger import logger
-from service import get_all_documents, get_document_by_id
+from core.doc_const import DOCUMENTS
+from core.logger import logger
+from service.service import get_all_documents, get_document_by_id
 
 
 @asynccontextmanager
