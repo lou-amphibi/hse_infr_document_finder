@@ -76,3 +76,15 @@ def create_document(payload: DocumentCreate) -> Dict:
     logger.info("create_document: created id=%s, title=%r", new_id, payload.title)
 
     return document
+
+
+def delete_document(document_id: int) -> bool:
+    logger.debug("delete_document: document_id=%r", document_id)
+
+    if document_id not in DOCUMENTS:
+        logger.warning("delete_document: document %s not found", document_id)
+        return False
+
+    removed = DOCUMENTS.pop(document_id)
+    logger.info("delete_document: removed id=%s, title=%r", document_id, removed["title"])
+    return True
