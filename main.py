@@ -5,7 +5,14 @@ from fastapi import FastAPI, HTTPException
 
 from core.doc_const import DOCUMENTS
 from core.logger import logger
-from service.service import get_all_documents, get_document_by_id
+from models.schemas import DocumentCreate, DocumentSearch
+
+from service.service import (
+    create_document,
+    find_document_by_full_match,
+    get_all_documents,
+    get_document_by_id,
+)
 
 
 @asynccontextmanager
@@ -37,6 +44,19 @@ def list_documents(
     return documents
 
 
+@app.post("/documents", status_code=201)
+def create_new_document(payload: DocumentCreate):
+    logger.info(
+        "POST /documents — title=%r, author=%r, year=%r, type=%r",
+        payload.title, payload.author, payload.year, payload.type,
+    )
+
+    document = create_document(payload)
+
+    logger.info("POST /documents — created id=%s, responding with 201", document["id"])
+    return document
+
+
 @app.get("/documents/{document_id}")
 def get_document(document_id: int):
     logger.info("GET /documents/%s — incoming request", document_id)
@@ -51,6 +71,26 @@ def get_document(document_id: int):
     return document
 
 
+@app.post("/documents/search")
+def search_document(query: DocumentSearch):
+    logger.info(
+        "POST /documents/search — title=%r, author=%r, year=%r, type=%r",
+        query.title, query.author, query.year, query.type,
+    )
+
+    document = find_document_by_full_match(query)
+
+    if document is None:
+        logger.warning("POST /documents/search — no match, returning 404")
+        raise HTTPException(
+            status_code=404,
+            detail="Документ с такими параметрами не найден",
+        )
+
+    logger.info("POST /documents/search — found id=%s", document["id"])
+    return document
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -58,4 +98,4 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"version": "0.1v"}
+    return {"version": "0.3v"}
