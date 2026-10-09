@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
-from logger import logger
-from doc_const import DOCUMENTS
+from core.logger import logger
+from core.doc_const import DOCUMENTS
 
 
 def get_all_documents(
